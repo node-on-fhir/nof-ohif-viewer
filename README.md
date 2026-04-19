@@ -1,0 +1,83 @@
+# @ohif/extension-awatson1978-ohif-viewer
+
+Consolidated OHIF viewer extension — custom viewport actions, ECG waveform rendering, FHIR data source, hanging protocols, DICOM ZIP export, and a minimal viewer layout.
+
+## Quick Start
+
+```bash
+git clone https://github.com/OHIF/Viewers
+cd Viewers/extensions
+git clone https://github.com/awatson1978/ohif-viewer
+cd ohif-viewer && node scripts/setup.js && cd ../..
+yarn install
+yarn dev
+```
+
+The setup script copies the companion mode into `modes/awatson1978/` and patches `platform/app/pluginConfig.json` with the required extension and mode entries. It is idempotent — safe to run multiple times.
+
+## Features
+
+**Commands**
+- `awatson1978.logViewportData` — logs full viewport state (camera, display sets, tools, measurements, performance) to the console
+- `awatson1978.inspectViewportState` — opens a modal with viewport properties, actors, and image data
+- `awatson1978.textCallback` — text annotation input dialog (used by the Text tool)
+- `downloadDicomZip` — exports the current study as a ZIP of DICOM Part 10 files (WADO-RS, WADO-URI, and blob URL strategies)
+
+**ECG Waveform Viewport**
+Renders DICOM ECG waveforms using `dcmjs-ecg`. Handles 7 SOP classes:
+- 12-Lead ECG (`1.2.840.10008.5.1.4.1.1.9.1.1`)
+- General ECG (`1.2.840.10008.5.1.4.1.1.9.1.2`)
+- Ambulatory ECG (`1.2.840.10008.5.1.4.1.1.9.1.3`)
+- Hemodynamic Waveform (`1.2.840.10008.5.1.4.1.1.9.2.1`)
+- Basic Cardiac EP (`1.2.840.10008.5.1.4.1.1.9.3.1`)
+- Arterial Pulse Waveform (`1.2.840.10008.5.1.4.1.1.9.5.1`)
+- Respiratory Waveform (`1.2.840.10008.5.1.4.1.1.9.6.1`)
+
+**FHIR Data Source**
+A `webApi` data source that connects to FHIR R4 servers with SMART on FHIR auth, translating ImagingStudy and DocumentReference resources into OHIF-compatible study/series/instance metadata.
+
+**Hanging Protocols**
+- `chestBodyPart` — body-part-aware protocol for chest imaging
+
+**Panels**
+- `fhirConfig` — configuration panel for FHIR server URL, auth, and connection testing
+
+**Layout Templates**
+- `minimalViewerLayout` — a streamlined viewer layout
+
+**Customizations**
+- `viewportContextMenu` — right-click context menu with DICOM ZIP export
+
+## Module Reference
+
+| Module Type | OHIF ID | Description |
+|---|---|---|
+| `commandsModule` | `awatson1978.logViewportData`, `awatson1978.inspectViewportState`, `awatson1978.textCallback`, `downloadDicomZip` | Viewport logging, state inspector, text input, DICOM export |
+| `viewportModule` | `ecg-dicom` | ECG waveform viewport |
+| `sopClassHandlerModule` | `ecg-dicom` | Display set builder for ECG SOP classes |
+| `dataSourcesModule` | `fhir` | FHIR R4 data source |
+| `panelModule` | `fhirConfig` | FHIR configuration panel |
+| `hangingProtocolModule` | `chestBodyPart` | Chest body-part hanging protocol |
+| `layoutTemplateModule` | `minimalViewerLayout` | Minimal viewer layout |
+| `customizationModule` | `viewportContextMenu` | Right-click context menu |
+
+## Companion Mode
+
+The `awatson1978` mode (bundled in `mode/`) provides a standard OHIF layout configured for this extension. It:
+
+- Registers the ECG viewport and SOP class handler alongside the default Cornerstone viewport
+- Adds the FHIR config panel to the right panel group
+- Configures toolbar sections with measurement tools, viewport actions, and the log/inspect buttons
+- Sets up right-click context menus with DICOM export
+- Extends the default tool group with a Text annotation tool
+
+Route: `/awatson1978`
+
+## Dependencies
+
+- **jszip** `^3.10.1` — ZIP archive generation for DICOM export
+- **dcmjs-ecg** `^0.0.14` — DICOM ECG waveform parsing and rendering
+
+## License
+
+MIT

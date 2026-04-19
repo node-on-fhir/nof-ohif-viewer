@@ -1,0 +1,187 @@
+import { hotkeys } from '@ohif/core';
+import { initToolGroups, toolbarButtons } from '@ohif/mode-longitudinal';
+import { id } from './id';
+import pushCustomToolsToDefaultToolGroup from './pushCustomToolsToDefaultToolGroup';
+
+const ohif = {
+  layout: '@ohif/extension-default.layoutTemplateModule.viewerLayout',
+  sopClassHandler: '@ohif/extension-default.sopClassHandlerModule.stack',
+  hangingProtocol: ['default', 'chestBodyPart'],
+  leftPanel: '@ohif/extension-default.panelModule.seriesList',
+  rightPanel: '@ohif/extension-cornerstone.panelModule.panelMeasurement',
+};
+
+const cornerstone = {
+  viewport: '@ohif/extension-cornerstone.viewportModule.cornerstone',
+};
+
+const awatson = {
+  fhirPanel:
+    '@ohif/extension-awatson1978-ohif-viewer.panelModule.fhirConfig',
+  ecgSopClassHandler:
+    '@ohif/extension-awatson1978-ohif-viewer.sopClassHandlerModule.ecg-dicom',
+  ecgViewport:
+    '@ohif/extension-awatson1978-ohif-viewer.viewportModule.ecg-dicom',
+};
+
+const extensionDependencies = {
+  '@ohif/extension-default': '^3.0.0',
+  '@ohif/extension-cornerstone': '^3.0.0',
+  '@ohif/extension-cornerstone-dicom-seg': '^3.0.0',
+  '@ohif/extension-awatson1978-ohif-viewer': '^0.0.1',
+};
+
+function modeFactory({ modeConfiguration }) {
+  return {
+    id,
+    routeName: 'awatson1978',
+    displayName: 'Abbie Watson',
+    onModeEnter: ({ servicesManager, extensionManager, commandsManager }: withAppTypes) => {
+      const { measurementService, toolbarService, toolGroupService, customizationService } =
+        servicesManager.services;
+
+      measurementService.clearMeasurements();
+
+      initToolGroups(extensionManager, toolGroupService, commandsManager);
+      pushCustomToolsToDefaultToolGroup(extensionManager, toolGroupService, commandsManager);
+
+      toolbarService.register([...toolbarButtons]);
+
+      customizationService.setCustomizations({
+        cornerstoneViewportClickCommands: {
+          $set: {
+            doubleClick: ['toggleOneUp'],
+            button1: ['closeContextMenu'],
+            button3: [
+              {
+                commandName: 'showCornerstoneContextMenu',
+                commandOptions: {
+                  requireNearbyToolData: true,
+                  menuCustomizationId: 'measurementsContextMenu',
+                },
+              },
+              {
+                commandName: 'showCornerstoneContextMenu',
+                commandOptions: {
+                  menuCustomizationId: 'awatson1978.viewportContextMenu',
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      toolbarService.updateSection('primary', [
+        'MeasurementTools',
+        'Zoom',
+        'Pan',
+        'TrackballRotate',
+        'WindowLevel',
+        'Capture',
+        'Layout',
+        'Crosshairs',
+        'MoreTools',
+        'awatson1978-ohif-viewer.logViewportData',
+        'awatson1978-ohif-viewer.inspectViewportState',
+      ]);
+
+      toolbarService.updateSection('MeasurementTools', [
+        'Length',
+        'Bidirectional',
+        'ArrowAnnotate',
+        'Text',
+        'EllipticalROI',
+        'RectangleROI',
+        'CircleROI',
+        'PlanarFreehandROI',
+        'SplineROI',
+        'LivewireContour',
+      ]);
+
+      toolbarService.updateSection('MoreTools', [
+        'Reset',
+        'rotate-right',
+        'flipHorizontal',
+        'ImageSliceSync',
+        'ReferenceLines',
+        'ImageOverlayViewer',
+        'StackScroll',
+        'invert',
+        'Probe',
+        'Cine',
+        'Angle',
+        'CobbAngle',
+        'Magnify',
+        'CalibrationLine',
+        'TagBrowser',
+        'AdvancedMagnify',
+        'UltrasoundDirectionalTool',
+        'WindowLevelRegion',
+      ]);
+
+      toolbarService.updateSection(toolbarService.sections.viewportActionMenu.topRight, [
+        'awatson1978-ohif-viewer.logViewportData',
+        'awatson1978-ohif-viewer.inspectViewportState',
+      ]);
+    },
+    onModeExit: ({ servicesManager }: withAppTypes) => {
+      const {
+        toolGroupService,
+        syncGroupService,
+        segmentationService,
+        cornerstoneViewportService,
+        uiDialogService,
+        uiModalService,
+      } = servicesManager.services;
+
+      uiDialogService.hideAll();
+      uiModalService.hide();
+      toolGroupService.destroy();
+      syncGroupService.destroy();
+      segmentationService.destroy();
+      cornerstoneViewportService.destroy();
+    },
+    validationTags: {
+      study: [],
+      series: [],
+    },
+    isValidMode: ({ modalities }) => {
+      return { valid: true };
+    },
+    routes: [
+      {
+        path: 'template',
+        layoutTemplate: ({ location, servicesManager }) => {
+          return {
+            id: ohif.layout,
+            props: {
+              leftPanels: [ohif.leftPanel],
+              rightPanels: [ohif.rightPanel, awatson.fhirPanel],
+              viewports: [
+                {
+                  namespace: cornerstone.viewport,
+                  displaySetsToDisplay: [ohif.sopClassHandler],
+                },
+                {
+                  namespace: awatson.ecgViewport,
+                  displaySetsToDisplay: [awatson.ecgSopClassHandler],
+                },
+              ],
+            },
+          };
+        },
+      },
+    ],
+    extensions: extensionDependencies,
+    hangingProtocol: ohif.hangingProtocol,
+    sopClassHandlers: [ohif.sopClassHandler, awatson.ecgSopClassHandler],
+  };
+}
+
+const mode = {
+  id,
+  modeFactory,
+  extensionDependencies,
+};
+
+export default mode;
