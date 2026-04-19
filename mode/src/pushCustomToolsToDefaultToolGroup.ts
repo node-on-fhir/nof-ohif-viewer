@@ -12,13 +12,13 @@ export default function pushCustomToolsToDefaultToolGroup(
         toolName: 'Text',
         configuration: {
           getTextCallback: (callback, eventDetails) => {
-            commandsManager.runCommand('awatson1978.textCallback', {
+            commandsManager.runCommand('nof.textCallback', {
               callback,
               eventDetails,
             });
           },
           changeTextCallback: (data, eventDetails, callback) => {
-            commandsManager.runCommand('awatson1978.textCallback', {
+            commandsManager.runCommand('nof.textCallback', {
               callback,
               data,
               eventDetails,

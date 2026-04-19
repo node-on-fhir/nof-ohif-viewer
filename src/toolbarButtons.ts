@@ -3,27 +3,27 @@ import type { Button } from '@ohif/core/types';
 function toolbarButtons() {
   const buttons: Button[] = [
     {
-      id: 'awatson1978-ohif-viewer.logViewportData',
+      id: 'nof-ohif-viewer.logViewportData',
       uiType: 'ohif.toolButton',
       props: {
         icon: 'dicom-tag-browser',
         label: 'Viewport Data',
         tooltip: 'Log comprehensive viewport data to console',
         commands: {
-          commandName: 'awatson1978.logViewportData',
+          commandName: 'nof.logViewportData',
         },
         evaluate: 'evaluate.action',
       },
     },
     {
-      id: 'awatson1978-ohif-viewer.inspectViewportState',
+      id: 'nof-ohif-viewer.inspectViewportState',
       uiType: 'ohif.toolButton',
       props: {
         icon: 'info',
         label: 'Inspect State',
         tooltip: 'Inspect current viewport state and properties',
         commands: {
-          commandName: 'awatson1978.inspectViewportState',
+          commandName: 'nof.inspectViewportState',
         },
         evaluate: 'evaluate.action',
       },

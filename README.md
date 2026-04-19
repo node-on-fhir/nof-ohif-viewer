@@ -1,4 +1,4 @@
-# @ohif/extension-awatson1978-ohif-viewer
+# @ohif/extension-nof-ohif-viewer
 
 Consolidated OHIF viewer extension — custom viewport actions, ECG waveform rendering, FHIR data source, hanging protocols, DICOM ZIP export, and a minimal viewer layout.
 
@@ -13,14 +13,14 @@ yarn install
 yarn dev
 ```
 
-The setup script copies the companion mode into `modes/awatson1978/` and patches `platform/app/pluginConfig.json` with the required extension and mode entries. It is idempotent — safe to run multiple times.
+The setup script copies the companion mode into `modes/node-on-fhir/` and patches `platform/app/pluginConfig.json` with the required extension and mode entries. It is idempotent — safe to run multiple times.
 
 ## Features
 
 **Commands**
-- `awatson1978.logViewportData` — logs full viewport state (camera, display sets, tools, measurements, performance) to the console
-- `awatson1978.inspectViewportState` — opens a modal with viewport properties, actors, and image data
-- `awatson1978.textCallback` — text annotation input dialog (used by the Text tool)
+- `nof.logViewportData` — logs full viewport state (camera, display sets, tools, measurements, performance) to the console
+- `nof.inspectViewportState` — opens a modal with viewport properties, actors, and image data
+- `nof.textCallback` — text annotation input dialog (used by the Text tool)
 - `downloadDicomZip` — exports the current study as a ZIP of DICOM Part 10 files (WADO-RS, WADO-URI, and blob URL strategies)
 
 **ECG Waveform Viewport**
@@ -52,7 +52,7 @@ A `webApi` data source that connects to FHIR R4 servers with SMART on FHIR auth,
 
 | Module Type | OHIF ID | Description |
 |---|---|---|
-| `commandsModule` | `awatson1978.logViewportData`, `awatson1978.inspectViewportState`, `awatson1978.textCallback`, `downloadDicomZip` | Viewport logging, state inspector, text input, DICOM export |
+| `commandsModule` | `nof.logViewportData`, `nof.inspectViewportState`, `nof.textCallback`, `downloadDicomZip` | Viewport logging, state inspector, text input, DICOM export |
 | `viewportModule` | `ecg-dicom` | ECG waveform viewport |
 | `sopClassHandlerModule` | `ecg-dicom` | Display set builder for ECG SOP classes |
 | `dataSourcesModule` | `fhir` | FHIR R4 data source |
@@ -63,7 +63,7 @@ A `webApi` data source that connects to FHIR R4 servers with SMART on FHIR auth,
 
 ## Companion Mode
 
-The `awatson1978` mode (bundled in `mode/`) provides a standard OHIF layout configured for this extension. It:
+The `node-on-fhir` mode (bundled in `mode/`) provides a standard OHIF layout configured for this extension. It:
 
 - Registers the ECG viewport and SOP class handler alongside the default Cornerstone viewport
 - Adds the FHIR config panel to the right panel group
@@ -71,7 +71,7 @@ The `awatson1978` mode (bundled in `mode/`) provides a standard OHIF layout conf
 - Sets up right-click context menus with DICOM export
 - Extends the default tool group with a Text annotation tool
 
-Route: `/awatson1978`
+Route: `/node-on-fhir`
 
 ## Dependencies
 

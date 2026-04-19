@@ -29,7 +29,7 @@ export default function getCustomizationModule({ servicesManager, extensionManag
     {
       name: 'default',
       value: {
-        'awatson1978.viewportContextMenu': {
+        'nof.viewportContextMenu': {
           inheritsFrom: 'ohif.contextMenu',
           menus: [
             {
@@ -38,11 +38,11 @@ export default function getCustomizationModule({ servicesManager, extensionManag
               items: [
                 {
                   label: 'Log Viewport Info',
-                  commands: [{ commandName: 'awatson1978.logViewportData' }],
+                  commands: [{ commandName: 'nof.logViewportData' }],
                 },
                 {
                   label: 'Inspect Viewport State',
-                  commands: [{ commandName: 'awatson1978.inspectViewportState' }],
+                  commands: [{ commandName: 'nof.inspectViewportState' }],
                 },
               ],
             },

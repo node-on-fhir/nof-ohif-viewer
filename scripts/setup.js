@@ -7,17 +7,17 @@ const path = require('path');
 const EXTENSION_DIR = path.resolve(__dirname, '..');
 const VIEWERS_ROOT = path.resolve(EXTENSION_DIR, '../..');
 const MODES_DIR = path.join(VIEWERS_ROOT, 'modes');
-const MODE_TARGET = path.join(MODES_DIR, 'awatson1978');
+const MODE_TARGET = path.join(MODES_DIR, 'node-on-fhir');
 const MODE_SOURCE = path.join(EXTENSION_DIR, 'mode');
 const PLUGIN_CONFIG = path.join(VIEWERS_ROOT, 'platform', 'app', 'pluginConfig.json');
 
 const EXTENSION_ENTRY = {
-  packageName: '@ohif/extension-awatson1978-ohif-viewer',
+  packageName: '@ohif/extension-nof-ohif-viewer',
   version: '0.0.1',
 };
 
 const MODE_ENTRY = {
-  packageName: 'awatson1978',
+  packageName: 'node-on-fhir',
 };
 
 // ---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ const MODE_ENTRY = {
 
 function copyMode() {
   if (fs.existsSync(MODE_TARGET)) {
-    console.log('[skip] modes/awatson1978/ already exists');
+    console.log('[skip] modes/node-on-fhir/ already exists');
     return false;
   }
 
@@ -36,7 +36,7 @@ function copyMode() {
   }
 
   fs.cpSync(MODE_SOURCE, MODE_TARGET, { recursive: true });
-  console.log('[done] Copied mode/ → modes/awatson1978/');
+  console.log('[done] Copied mode/ → modes/node-on-fhir/');
   return true;
 }
 

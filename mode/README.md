@@ -1,8 +1,8 @@
-# awatson1978
+# node-on-fhir
 
 > OHIF Mode — Lab #96: Watson mode with custom viewport actions
 
-This mode provides a standard OHIF viewer layout with custom viewport action buttons in the top-right corner of each viewport. It depends on the `@ohif/extension-awatson1978-custom-actions` extension.
+This mode provides a standard OHIF viewer layout with custom viewport action buttons in the top-right corner of each viewport. It depends on the `@ohif/extension-nof-custom-actions` extension.
 
 **Author:** Abigail Watson
 **License:** MIT
@@ -16,4 +16,4 @@ This mode provides a standard OHIF viewer layout with custom viewport action but
 
 ## Extension Dependency
 
-This mode depends on `@ohif/extension-awatson1978-custom-actions`. See the extension's [README](../../extensions/awatson1978-custom-actions/README.md) for detailed documentation on the commands, architecture, and how to add new viewport actions.
+This mode depends on `@ohif/extension-nof-custom-actions`. See the extension's [README](../../extensions/nof-custom-actions/README.md) for detailed documentation on the commands, architecture, and how to add new viewport actions.

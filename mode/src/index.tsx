@@ -17,25 +17,25 @@ const cornerstone = {
 
 const awatson = {
   fhirPanel:
-    '@ohif/extension-awatson1978-ohif-viewer.panelModule.fhirConfig',
+    '@ohif/extension-nof-ohif-viewer.panelModule.fhirConfig',
   ecgSopClassHandler:
-    '@ohif/extension-awatson1978-ohif-viewer.sopClassHandlerModule.ecg-dicom',
+    '@ohif/extension-nof-ohif-viewer.sopClassHandlerModule.ecg-dicom',
   ecgViewport:
-    '@ohif/extension-awatson1978-ohif-viewer.viewportModule.ecg-dicom',
+    '@ohif/extension-nof-ohif-viewer.viewportModule.ecg-dicom',
 };
 
 const extensionDependencies = {
   '@ohif/extension-default': '^3.0.0',
   '@ohif/extension-cornerstone': '^3.0.0',
   '@ohif/extension-cornerstone-dicom-seg': '^3.0.0',
-  '@ohif/extension-awatson1978-ohif-viewer': '^0.0.1',
+  '@ohif/extension-nof-ohif-viewer': '^0.0.1',
 };
 
 function modeFactory({ modeConfiguration }) {
   return {
     id,
-    routeName: 'awatson1978',
-    displayName: 'Abbie Watson',
+    routeName: 'node-on-fhir',
+    displayName: 'Node on FHIR',
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }: withAppTypes) => {
       const { measurementService, toolbarService, toolGroupService, customizationService } =
         servicesManager.services;
@@ -63,7 +63,7 @@ function modeFactory({ modeConfiguration }) {
               {
                 commandName: 'showCornerstoneContextMenu',
                 commandOptions: {
-                  menuCustomizationId: 'awatson1978.viewportContextMenu',
+                  menuCustomizationId: 'nof.viewportContextMenu',
                 },
               },
             ],
@@ -81,8 +81,8 @@ function modeFactory({ modeConfiguration }) {
         'Layout',
         'Crosshairs',
         'MoreTools',
-        'awatson1978-ohif-viewer.logViewportData',
-        'awatson1978-ohif-viewer.inspectViewportState',
+        'nof-ohif-viewer.logViewportData',
+        'nof-ohif-viewer.inspectViewportState',
       ]);
 
       toolbarService.updateSection('MeasurementTools', [
@@ -120,8 +120,8 @@ function modeFactory({ modeConfiguration }) {
       ]);
 
       toolbarService.updateSection(toolbarService.sections.viewportActionMenu.topRight, [
-        'awatson1978-ohif-viewer.logViewportData',
-        'awatson1978-ohif-viewer.inspectViewportState',
+        'nof-ohif-viewer.logViewportData',
+        'nof-ohif-viewer.inspectViewportState',
       ]);
     },
     onModeExit: ({ servicesManager }: withAppTypes) => {

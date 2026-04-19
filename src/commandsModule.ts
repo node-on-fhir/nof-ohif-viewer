@@ -594,13 +594,13 @@ function commandsModule({
   };
 
   const definitions = {
-    'awatson1978.logViewportData': {
+    'nof.logViewportData': {
       commandFn: actions.logViewportDataCommand,
     },
-    'awatson1978.inspectViewportState': {
+    'nof.inspectViewportState': {
       commandFn: actions.inspectViewportStateCommand,
     },
-    'awatson1978.textCallback': {
+    'nof.textCallback': {
       commandFn: actions.textCallback,
     },
     downloadDicomZip: {
