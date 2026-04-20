@@ -183,6 +183,10 @@ function createFhirApi(fhirConfig, servicesManager) {
     Object.assign(_config, fhirConfig);
   }
 
+  if (process.env.SMART_CLIENT_ID) {
+    _config.smartClientId = process.env.SMART_CLIENT_ID;
+  }
+
   const implementation = {
     initialize: async ({ params, query }) => {
       // Capture all URL query params for display in the sidebar
@@ -284,6 +288,18 @@ function createFhirApi(fhirConfig, servicesManager) {
         const clientId = _config.smartClientId || '';
         if (!clientId) {
           console.error('[FHIR] No smartClientId configured — cannot start OAuth flow');
+          const { uiNotificationService } = _servicesManager?.services || {};
+          if (uiNotificationService) {
+            uiNotificationService.show({
+              title: 'SMART on FHIR',
+              message:
+                'No client ID configured. Set SMART_CLIENT_ID in platform/app/.env and restart the dev server.',
+              type: 'error',
+              duration: 15000,
+            });
+          }
+          _store.studyInstanceUIDs = [PLACEHOLDER_STUDY_UID];
+          return [PLACEHOLDER_STUDY_UID];
         }
         const scope = _config.smartScope || 'launch openid fhirUser patient/*.read';
         const patientId = qGet('patient') || qGet('patientId') || _config.patientId;

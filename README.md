@@ -39,6 +39,16 @@ Renders DICOM ECG waveforms using `dcmjs-ecg`. Handles 7 SOP classes:
 **FHIR Data Source**
 A `webApi` data source that connects to FHIR R4 servers with SMART on FHIR auth, translating ImagingStudy and DocumentReference resources into OHIF-compatible study/series/instance metadata.
 
+### SMART on FHIR Configuration
+
+The SMART `client_id` used during the OAuth flow defaults to the value in `config/default.js` (`smartClientId`). To override it per-environment without editing `default.js`, add the following to `Viewers/platform/app/.env`:
+
+```
+SMART_CLIENT_ID=your-registered-client-id
+```
+
+The `.env` value takes priority over the config file. Restart the dev server after changing `.env`.
+
 **Hanging Protocols**
 - `chestBodyPart` — body-part-aware protocol for chest imaging
 
