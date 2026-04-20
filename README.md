@@ -2,6 +2,9 @@
 
 Consolidated OHIF viewer extension — custom viewport actions, ECG waveform rendering, FHIR data source, hanging protocols, DICOM ZIP export, and a minimal viewer layout.
 
+<img width="2560" height="1440" alt="Screenshot 2026-04-20 at 3 12 15 AM" src="https://github.com/user-attachments/assets/d36cf187-f401-4bab-b22e-ab8d8cbac517" />
+
+
 ## Quick Start
 
 ```bash
