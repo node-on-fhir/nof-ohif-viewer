@@ -10,6 +10,7 @@ const MODES_DIR = path.join(VIEWERS_ROOT, 'modes');
 const MODE_TARGET = path.join(MODES_DIR, 'node-on-fhir');
 const MODE_SOURCE = path.join(EXTENSION_DIR, 'mode');
 const PLUGIN_CONFIG = path.join(VIEWERS_ROOT, 'platform', 'app', 'pluginConfig.json');
+const WEBPACK_PWA = path.join(VIEWERS_ROOT, 'platform', 'app', '.webpack', 'webpack.pwa.js');
 
 const EXTENSION_ENTRY = {
   packageName: '@ohif/extension-nof-ohif-viewer',
@@ -87,6 +88,61 @@ function patchPluginConfig() {
 }
 
 // ---------------------------------------------------------------------------
+// 3. Patch webpack dev server proxy (add /fhir-proxy entry)
+// ---------------------------------------------------------------------------
+
+function patchWebpackProxy() {
+  if (!fs.existsSync(WEBPACK_PWA)) {
+    console.error('[error] webpack.pwa.js not found at ' + WEBPACK_PWA);
+    process.exit(1);
+  }
+
+  let content = fs.readFileSync(WEBPACK_PWA, 'utf8');
+
+  if (content.includes("context: ['/fhir-proxy']")) {
+    console.log('[skip] /fhir-proxy proxy entry already in webpack.pwa.js');
+    return;
+  }
+
+  const fhirProxyTarget = process.env.FHIR_PROXY_TARGET || 'http://localhost:3200';
+
+  const FHIR_PROXY_BLOCK = [
+    '        {',
+    "          context: ['/fhir-proxy'],",
+    `          target: '${fhirProxyTarget}',`,
+    '          changeOrigin: true,',
+    "          pathRewrite: { '^/fhir-proxy': '' },",
+    '        },',
+  ].join('\n');
+
+  // Find the /dicomweb proxy block's closing "}," and insert after it.
+  // The pattern: the line with "context: ['/dicomweb']" is inside a block
+  // that ends with "},". We look for that block's closing brace-comma.
+  const dicomwebIdx = content.indexOf("context: ['/dicomweb']");
+  if (dicomwebIdx === -1) {
+    console.error('[error] Could not find /dicomweb proxy entry in webpack.pwa.js');
+    console.error('        Please add the /fhir-proxy proxy block manually.');
+    return;
+  }
+
+  // Find the closing "}," after the /dicomweb context line
+  const closingIdx = content.indexOf('},', dicomwebIdx);
+  if (closingIdx === -1) {
+    console.error('[error] Could not find closing }, for /dicomweb proxy block');
+    return;
+  }
+
+  // Insert the fhir-proxy block after the "}," (plus the newline)
+  const insertPos = closingIdx + 2; // after "},"
+  const before = content.slice(0, insertPos);
+  const after = content.slice(insertPos);
+  content = before + '\n' + FHIR_PROXY_BLOCK + after;
+
+  fs.writeFileSync(WEBPACK_PWA, content);
+  console.log('[done] Added /fhir-proxy proxy entry to webpack.pwa.js (target: ' + fhirProxyTarget + ')');
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -97,6 +153,7 @@ console.log('');
 
 copyMode();
 patchPluginConfig();
+patchWebpackProxy();
 
 console.log('');
 console.log('Next steps:');

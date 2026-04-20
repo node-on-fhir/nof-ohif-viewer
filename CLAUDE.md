@@ -32,7 +32,7 @@ If the setup script doesn't work, do it by hand:
 | Extension package name | `@ohif/extension-nof-ohif-viewer` |
 | Extension ID | read from `package.json` name field via `src/id.js` |
 | Mode package name | `node-on-fhir` |
-| Mode route | `/node-on-fhir` |
+| Mode route | `/fhir-viewer` |
 | Command prefix | `nof.` (e.g. `nof.logViewportData`) |
 | Toolbar button prefix | `nof-ohif-viewer.` |
 
@@ -51,6 +51,33 @@ If the setup script doesn't work, do it by hand:
 - **Customizations**: `src/getCustomizationModule.ts` — right-click context menu
 
 The companion mode at `mode/src/index.tsx` wires everything together: it imports from `@ohif/mode-longitudinal` for base tool groups and toolbar buttons, then overlays custom toolbar sections and registers the extension's ECG viewport/SOP handler.
+
+## FHIR Proxy
+
+The webpack dev server proxies `/fhir-proxy` requests to an upstream FHIR server, avoiding CORS issues during development.
+
+**How it works**: The proxy entry in `Viewers/platform/app/.webpack/webpack.pwa.js` (lines 161–166) forwards any request to `/fhir-proxy/*` to the target server, stripping the `/fhir-proxy` prefix:
+
+```js
+{
+  context: ['/fhir-proxy'],
+  target: 'http://localhost:3200',
+  changeOrigin: true,
+  pathRewrite: { '^/fhir-proxy': '' },
+}
+```
+
+**Automatic URL rewriting**: The FhirDataSource (`src/FhirDataSource/index.js`) detects when the FHIR server origin differs from the app origin and rewrites `_config.fhirBaseUrl` / `_config.fhirServerRoot` to use `/fhir-proxy` (lines 243–250, 346–353).
+
+**Default FHIR config** (in `_config`):
+- `fhirBaseUrl`: `http://localhost:3000/baseR4`
+- `fhirServerRoot`: `http://localhost:3000`
+
+**Env var overrides** (in `webpack.pwa.js`):
+- `PROXY_TARGET` / `PROXY_DOMAIN` — adds an additional proxy entry when both are set
+- `PROXY_PATH_REWRITE_FROM` / `PROXY_PATH_REWRITE_TO` — custom path rewrite rules for that entry
+
+**Setup**: `scripts/setup.js` patches the webpack config to ensure the `/fhir-proxy` proxy entry exists. Set `FHIR_PROXY_TARGET` env var at setup time to override the default target (`http://localhost:3200`).
 
 ## Common Tasks
 
