@@ -34,8 +34,11 @@ const extensionDependencies = {
 function modeFactory({ modeConfiguration }) {
   return {
     id,
-    routeName: 'node-on-fhir',
+    routeName: 'fhir-viewer',
     displayName: 'Node on FHIR',
+    onModeInit: ({ servicesManager, extensionManager }) => {
+      extensionManager.setActiveDataSource('fhir');
+    },
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }: withAppTypes) => {
       const { measurementService, toolbarService, toolGroupService, customizationService } =
         servicesManager.services;
@@ -123,6 +126,17 @@ function modeFactory({ modeConfiguration }) {
         'nof-ohif-viewer.logViewportData',
         'nof-ohif-viewer.inspectViewportState',
       ]);
+
+      const { hangingProtocolService, displaySetService } = servicesManager.services;
+      setTimeout(() => {
+        const displaySets = displaySetService.getActiveDisplaySets();
+        if (!displaySets || !displaySets.length) {
+          hangingProtocolService._broadcastEvent(
+            hangingProtocolService.EVENTS.PROTOCOL_CHANGED,
+            {}
+          );
+        }
+      }, 300);
     },
     onModeExit: ({ servicesManager }: withAppTypes) => {
       const {

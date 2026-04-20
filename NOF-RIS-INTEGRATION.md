@@ -92,7 +92,7 @@ Alternatively, POST the equivalent JSON to the `/oauth/register` endpoint:
 }
 ```
 
-After registration, copy the generated `client_id`. The viewer defaults to `4YPEPzLr55w6roKCs`, but you can override it by setting the `smartClientId` field in the data source configuration.
+After registration, copy the generated `client_id` and set it as the `smartClientId` field in the data source configuration.
 
 ## Next Steps
 

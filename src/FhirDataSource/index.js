@@ -49,6 +49,8 @@ let _store = {
   loadedStudies: new Set(),
 };
 
+let _servicesManager = null;
+
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
@@ -142,14 +144,43 @@ async function _fetchStudyUIDs(patientId) {
     return _store.studyInstanceUIDs;
   } catch (error) {
     console.error('[FHIR] Failed to fetch studies:', error);
+    _showFhirError(_servicesManager, error);
     _store.studyInstanceUIDs = [PLACEHOLDER_STUDY_UID];
     return [PLACEHOLDER_STUDY_UID];
   }
 }
 
-function createFhirApi(fhirConfig) {
-  if (fhirConfig && fhirConfig.configuration) {
-    Object.assign(_config, fhirConfig.configuration);
+function _showFhirError(servicesManager, error) {
+  const { uiNotificationService } = servicesManager?.services || {};
+  if (!uiNotificationService) return;
+
+  // Try to extract the JSON message from the error string
+  // Error format: "FHIR request failed: 501 {"message":"..."}"
+  let userMessage = error.message || String(error);
+  try {
+    const jsonMatch = userMessage.match(/\{.*\}/s);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.message) {
+        userMessage = parsed.message;
+      }
+    }
+  } catch (e) {
+    // Use the raw error message if JSON parsing fails
+  }
+
+  uiNotificationService.show({
+    title: 'FHIR Server Error',
+    message: userMessage,
+    type: 'error',
+    duration: 10000,
+  });
+}
+
+function createFhirApi(fhirConfig, servicesManager) {
+  _servicesManager = servicesManager;
+  if (fhirConfig) {
+    Object.assign(_config, fhirConfig);
   }
 
   const implementation = {
@@ -250,7 +281,10 @@ function createFhirApi(fhirConfig) {
       // ── CASE B: EHR launch — discover endpoints & redirect to authorize ──
       if (iss && launch) {
         console.log('[FHIR] SMART EHR launch detected, starting OAuth flow...');
-        const clientId = _config.smartClientId || '4YPEPzLr55w6roKCs';
+        const clientId = _config.smartClientId || '';
+        if (!clientId) {
+          console.error('[FHIR] No smartClientId configured — cannot start OAuth flow');
+        }
         const scope = _config.smartScope || 'launch openid fhirUser patient/*.read';
         const patientId = qGet('patient') || qGet('patientId') || _config.patientId;
 
