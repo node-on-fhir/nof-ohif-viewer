@@ -196,3 +196,51 @@ export function getStoredToken() {
 export function clearToken() {
   sessionStorage.removeItem(TOKEN_KEY);
 }
+
+// --- Dynamic Client Registration ---
+
+export async function registerSmartClient({ fhirServerRoot, clientName, redirectUris, scope }) {
+  const url = `${fhirServerRoot}/oauth/registration`;
+  const entry = {
+    timestamp: new Date().toISOString(),
+    method: 'POST',
+    url,
+    status: 'pending',
+    error: null,
+  };
+  addLogEntry(entry);
+
+  try {
+    const body = {
+      client_name: clientName,
+      redirect_uris: redirectUris,
+      grant_types: ['authorization_code'],
+      response_types: ['code'],
+      scope,
+      token_endpoint_auth_method: 'client_secret_basic',
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    entry.status = response.status;
+
+    if (!response.ok) {
+      const text = await response.text();
+      entry.error = text;
+      throw new Error(`Client registration failed: ${response.status} ${text}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    if (entry.status === 'pending') {
+      entry.status = 'error';
+    }
+    entry.error = entry.error || error.message;
+    throw error;
+  }
+}

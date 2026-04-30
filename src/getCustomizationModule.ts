@@ -1,4 +1,5 @@
 import React from 'react';
+import SmartPreferencesModal from './customizations/SmartPreferencesModal';
 
 function HelloWorldPage() {
   return React.createElement(
@@ -29,6 +30,7 @@ export default function getCustomizationModule({ servicesManager, extensionManag
     {
       name: 'default',
       value: {
+        'ohif.userPreferencesModal': SmartPreferencesModal,
         'nof.viewportContextMenu': {
           inheritsFrom: 'ohif.contextMenu',
           menus: [

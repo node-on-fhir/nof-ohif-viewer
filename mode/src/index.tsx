@@ -6,7 +6,7 @@ import pushCustomToolsToDefaultToolGroup from './pushCustomToolsToDefaultToolGro
 const ohif = {
   layout: '@ohif/extension-default.layoutTemplateModule.viewerLayout',
   sopClassHandler: '@ohif/extension-default.sopClassHandlerModule.stack',
-  hangingProtocol: ['default', 'chestBodyPart'],
+  hangingProtocol: ['default', 'chestBodyPart', 'xrOneUp'],
   leftPanel: '@ohif/extension-default.panelModule.seriesList',
   rightPanel: '@ohif/extension-cornerstone.panelModule.panelMeasurement',
 };
@@ -18,6 +18,8 @@ const cornerstone = {
 const awatson = {
   fhirPanel:
     '@ohif/extension-nof-ohif-viewer.panelModule.fhirConfig',
+  fhirCastPanel:
+    '@ohif/extension-nof-ohif-viewer.panelModule.fhirCast',
   ecgSopClassHandler:
     '@ohif/extension-nof-ohif-viewer.sopClassHandlerModule.ecg-dicom',
   ecgViewport:
@@ -170,7 +172,9 @@ function modeFactory({ modeConfiguration }) {
             id: ohif.layout,
             props: {
               leftPanels: [ohif.leftPanel],
-              rightPanels: [ohif.rightPanel, awatson.fhirPanel],
+              rightPanels: [ohif.rightPanel, awatson.fhirPanel, awatson.fhirCastPanel],
+              rightPanelInitialExpandedWidth: 480,
+              rightPanelMinimumExpandedWidth: 400,
               viewports: [
                 {
                   namespace: cornerstone.viewport,

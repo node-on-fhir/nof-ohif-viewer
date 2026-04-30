@@ -22,6 +22,7 @@ import {
   clearAuthState,
   saveToken,
   getStoredToken,
+  registerSmartClient,
 } from './smartAuth';
 
 const metadataProvider = OHIF.classes.MetadataProvider;
@@ -83,6 +84,10 @@ export function updateFhirConfig(newConfig) {
 
 export function getFhirConfig() {
   return { ..._config };
+}
+
+export function getImagingStudyStore() {
+  return _store.imagingStudyMap;
 }
 
 function base64Random() {
@@ -185,6 +190,17 @@ function createFhirApi(fhirConfig, servicesManager) {
 
   if (process.env.SMART_CLIENT_ID) {
     _config.smartClientId = process.env.SMART_CLIENT_ID;
+  }
+
+  // Check localStorage for user-configured SMART settings (highest priority)
+  const savedSmartConfig = localStorage.getItem('fhir_smart_config');
+  if (savedSmartConfig) {
+    try {
+      const parsed = JSON.parse(savedSmartConfig);
+      if (parsed.smartClientId) _config.smartClientId = parsed.smartClientId;
+      if (parsed.smartScope) _config.smartScope = parsed.smartScope;
+      if (parsed.fhirBaseUrl) _config.fhirBaseUrl = parsed.fhirBaseUrl;
+    } catch (e) { /* ignore parse errors */ }
   }
 
   const implementation = {
@@ -583,6 +599,34 @@ function createFhirApi(fhirConfig, servicesManager) {
               }
             }
 
+            // If the launch URL includes a gridfsFileId, use it to override
+            // stale extension values in the ImagingStudy. The RIS constructs
+            // the launch URL from the current GridFS file, so it's authoritative.
+            const urlGridfsFileId = _config.urlParams?.gridfsFileId;
+            if (urlGridfsFileId) {
+              let gridfsInstanceCount = 0;
+              for (const [, instances] of instancesBySeriesUID) {
+                for (const inst of instances) {
+                  if (inst.gridfsFileId) gridfsInstanceCount++;
+                }
+              }
+              // Only override for single-instance studies (we can't map a single
+              // URL param to multiple instances)
+              if (gridfsInstanceCount === 1) {
+                for (const [, instances] of instancesBySeriesUID) {
+                  for (const inst of instances) {
+                    if (inst.gridfsFileId && inst.gridfsFileId !== urlGridfsFileId) {
+                      console.warn(
+                        '[FHIR] Overriding stale gridfsFileId from ImagingStudy extension:',
+                        inst.gridfsFileId, '→', urlGridfsFileId
+                      );
+                      inst.gridfsFileId = urlGridfsFileId;
+                    }
+                  }
+                }
+              }
+            }
+
             console.log('[FHIR] metadata() — seriesList.length:', seriesList.length, 'for', StudyInstanceUID);
 
             if (seriesList.length > 0) {
@@ -641,6 +685,12 @@ function createFhirApi(fhirConfig, servicesManager) {
                       const imageId = `wadouri:${blobUrl}`;
 
                       Object.assign(inst, wrapSequences(metadata));
+                      // Restore FHIR-assigned UIDs — the DICOM file may contain different
+                      // StudyInstanceUID/SeriesInstanceUID than what FHIR uses. The rest
+                      // of the system (routing, DicomMetadataStore, hanging protocol) relies
+                      // on the FHIR UIDs, so we must preserve them.
+                      inst.StudyInstanceUID = StudyInstanceUID;
+                      inst.SeriesInstanceUID = seriesMeta.SeriesInstanceUID;
                       inst.url = imageId;
                       inst.imageId = imageId;
 
@@ -921,4 +971,4 @@ function createFhirApi(fhirConfig, servicesManager) {
   return IWebApiDataSource.create(implementation);
 }
 
-export { createFhirApi, PLACEHOLDER_STUDY_UID };
+export { createFhirApi, PLACEHOLDER_STUDY_UID, registerSmartClient };
